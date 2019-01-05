@@ -1,3 +1,9 @@
+from mistune import Markdown
+from mistune import BlockLexer
+from mistune import InlineLexer
+from mistune import Renderer
+from mistune_contrib import math
+
 MIXED_CASE = '''The entries of $C$ are given by the exact formula:
 $$
 C_{ik} = \sum_{j=1}^n A_{ij} B_{jk}
@@ -43,3 +49,57 @@ i.e. the $i^{th}$'''
 
 def test_paragraph():
     pass
+
+class MathBlockLexer(math.MathBlockMixin, BlockLexer):
+    def __init__(self, *args, **kwargs):
+        super(MathBlockLexer, self).__init__(*args, **kwargs)
+        self.enable_math()
+
+class MathInlineLexer(InlineLexer, math.MathInlineMixin):
+    def __init__(self, *args, **kwargs):
+        super(MathInlineLexer, self).__init__(*args, **kwargs)
+        self.enable_math()
+
+class MathRenderer(Renderer, math.MathRendererMixin):
+    pass
+
+class MathMarkdown(Markdown, math.MathMarkdownMixin):
+    pass
+
+def test_block_math():
+
+    md = MathMarkdown(MathRenderer(),
+                      block=MathBlockLexer)
+
+    res = md('''
+$$
+y = x^2
+$$
+''')
+
+    assert 'math-renderer-mixin-block' in res
+
+def test_inline_math():
+
+    r = MathRenderer()
+    md = MathMarkdown(r,
+                      inline=MathInlineLexer(r))
+
+    res = md('foo: $ y = x^2 $')
+
+    assert 'math-renderer-mixin-inline' in res
+
+def test_latex_math():
+
+    md = MathMarkdown(MathRenderer(),
+                      block=MathBlockLexer)
+
+    res = md('''
+\\begin{foo}
+y = x^2
+\\end{foo}
+''')
+
+    print res
+
+    assert 'math-renderer-mixin-latex' in res
