@@ -9,6 +9,60 @@
     :copyright: (c) 2014 by Hsiaoming Yang.
 """
 
+
+"""
+    Usage: define your own block-lexer, inline-lexer, markdown engine and
+    renderer to customize math rendering.
+
+    from mistune import Markdown
+    from mistune import BlockLexer
+    from mistune import InlineLexer
+    from mistune import Renderer
+
+    class MathBlockLexer(MathBlockMixin, BlockLexer):
+        def __init__(self, *args, **kwargs):
+            super(MathBlockLexer, self).__init__(*args, **kwargs)
+            self.enable_math()
+
+
+    class MathInlineLexer(InlineLexer, MathInlineMixin):
+        def __init__(self, *args, **kwargs):
+            super(MathInlineLexer, self).__init__(*args, **kwargs)
+            self.enable_math()
+
+
+    class MathRenderer(Renderer, MathRendererMixin):
+        pass
+
+
+    class MathMarkdown(Markdown, MathMarkdownMixin):
+        pass
+
+    render = MathRenderer()
+    md = MathMarkdown(render,
+                      inline=MathInlineLexer(render),
+                      block=MathBlockLexer
+    )
+
+    print md('''
+    block math:
+
+    $$
+    y = x^2
+    $$
+
+    inline math: $ y = \\frac{1}{x} $''')
+
+    # output:
+    #     <p>block math:</p>
+    #
+    #     $$ this is my math:
+    #     y = x^2
+    #     $$
+    #     <p>inline math: $ this is my math:  y = \frac{1}{x} $</p>
+"""
+
+
 import re
 
 
@@ -94,56 +148,3 @@ class MathRendererMixin(object):
     def math(self, text):
         # override with customized math rendering
         return '$ math-renderer-mixin-inline: %s$' % text
-
-
-if __name__ == "__main__":
-
-    # Usage: define your own block-lexer, inline-lexer, markdown engine and
-    # renderer to customize math rendering.
-
-    from mistune import Markdown
-    from mistune import BlockLexer
-    from mistune import InlineLexer
-    from mistune import Renderer
-
-    class MathBlockLexer(MathBlockMixin, BlockLexer):
-        def __init__(self, *args, **kwargs):
-            super(MathBlockLexer, self).__init__(*args, **kwargs)
-            self.enable_math()
-
-
-    class MathInlineLexer(InlineLexer, MathInlineMixin):
-        def __init__(self, *args, **kwargs):
-            super(MathInlineLexer, self).__init__(*args, **kwargs)
-            self.enable_math()
-
-
-    class MathRenderer(Renderer, MathRendererMixin):
-        pass
-
-
-    class MathMarkdown(Markdown, MathMarkdownMixin):
-        pass
-
-    render = MathRenderer()
-    md = MathMarkdown(render,
-                      inline=MathInlineLexer(render),
-                      block=MathBlockLexer
-    )
-
-    print md('''
-block math:
-
-$$
-y = x^2
-$$
-
-inline math: $ y = \\frac{1}{x} $''')
-
-    # output:
-    #     <p>block math:</p>
-    #
-    #     $$ this is my math:
-    #     y = x^2
-    #     $$
-    #     <p>inline math: $ this is my math:  y = \frac{1}{x} $</p>
